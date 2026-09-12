@@ -1,3 +1,5 @@
+import re
+
 from flask import Flask, render_template, request, jsonify
 import requests
 import os
@@ -50,6 +52,7 @@ def get_location_info(location):
     country = place.get("country", "")
     timezone = place.get("timezone", "UTC")
 
+    # Get current weather AND local time from Open-Meteo
     weather_url = (
         "https://api.open-meteo.com/v1/forecast"
         f"?latitude={latitude}"
@@ -76,21 +79,31 @@ def get_location_info(location):
         "temperature_2m"
     )
 
+    local_datetime = current_weather.get(
+        "time"
+    )
+
     if temperature is None:
         raise ValueError(
             "Temperature data was not returned"
         )
 
-    local_time = datetime.now(
-        ZoneInfo(timezone)
+    if local_datetime is None:
+        raise ValueError(
+            "Local time data was not returned"
+        )
+
+    # Open-Meteo returns local time as YYYY-MM-DDTHH:MM
+    dt = datetime.fromisoformat(
+        local_datetime
     )
 
     return {
         "city": city,
         "country": country,
         "timezone": timezone,
-        "time": local_time.strftime("%I:%M %p"),
-        "date": local_time.strftime("%d %B %Y"),
+        "time": dt.strftime("%I:%M %p"),
+        "date": dt.strftime("%d %B %Y"),
         "temperature": temperature
     }
 
@@ -105,21 +118,32 @@ def extract_location(message):
 
     patterns = [
 
-        r"(?:what(?:'s| is)?|tell me|give me)?\s*"
-        r"(?:the\s+)?time\s+(?:in|at|of)\s+(.+?)[?.!]*$",
+        # What is the time in Perth?
+        r"(?:what(?:'s| is)?\s+)?(?:the\s+)?time\s+(?:in|at|of)\s+(.+?)[?.!]*$",
 
+        # What time is it in Perth?
+        r"(?:what\s+)?time\s+is\s+it\s+(?:in|at|of)\s+(.+?)[?.!]*$",
+
+        # Tell me the time in Perth
+        r"(?:tell me|give me)\s+(?:the\s+)?time\s+(?:in|at|of)\s+(.+?)[?.!]*$",
+
+        # Current/local time in Perth
         r"(?:current|local)\s+time\s+(?:in|at|of)\s+(.+?)[?.!]*$",
 
-        r"(?:what(?:'s| is)?|tell me|give me)?\s*"
-        r"(?:the\s+)?(?:temperature|temp)\s+(?:in|at|of)\s+(.+?)[?.!]*$",
+        # What is the temperature in Delhi?
+        r"(?:what(?:'s| is)?\s+)?(?:the\s+)?(?:temperature|temp)\s+(?:in|at|of)\s+(.+?)[?.!]*$",
 
-        r"(?:what(?:'s| is)?|tell me|give me)?\s*"
-        r"(?:the\s+)?weather\s+(?:in|at|of)\s+(.+?)[?.!]*$",
+        # What is the temperature of Delhi?
+        r"(?:what(?:'s| is)?\s+)?(?:the\s+)?(?:temperature|temp)\s+(?:of)\s+(.+?)[?.!]*$",
+
+        # Weather in Delhi
+        r"(?:what(?:'s| is)?\s+)?(?:the\s+)?weather\s+(?:in|at|of)\s+(.+?)[?.!]*$",
+
+        # What's the weather like in Delhi?
+        r"(?:what(?:'s| is)?\s+)?(?:the\s+)?weather\s+like\s+(?:in|at|of)\s+(.+?)[?.!]*$",
     ]
 
     for pattern in patterns:
-
-        import re
 
         match = re.search(
             pattern,

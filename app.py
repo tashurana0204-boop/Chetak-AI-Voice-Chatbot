@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
-import ollama
+import requests
+import os
 import subprocess
 import re
 import json
@@ -18,7 +19,6 @@ app = Flask(__name__)
 
 def get_location_info(location):
 
-    # Find the location
     encoded_location = urllib.parse.quote(location)
 
     geocode_url = (
@@ -71,15 +71,22 @@ def get_location_info(location):
             response.read().decode("utf-8")
         )
 
-    current_weather = weather_data.get("current", {})
+    current_weather = weather_data.get(
+        "current",
+        {}
+    )
 
-    temperature = current_weather.get("temperature_2m")
+    temperature = current_weather.get(
+        "temperature_2m"
+    )
 
     if temperature is None:
-        raise ValueError("Temperature data was not returned by weather service")
+        raise ValueError(
+            "Temperature data was not returned by weather service"
+        )
 
 
-    # Get current local time
+    # Get local time
     local_time = datetime.now(
         ZoneInfo(timezone)
     )
@@ -102,7 +109,6 @@ def get_location_info(location):
 def extract_location(message):
 
     text = message.strip()
-
 
     patterns = [
 
@@ -213,9 +219,9 @@ def chat():
     # WORLD TIME / WEATHER
     # =========================
 
-    location = extract_location(user_message)
-
-    print("Detected location:", location)
+    location = extract_location(
+        user_message
+    )
 
 
     if location:
@@ -308,22 +314,47 @@ def chat():
 
 
     # =========================
-    # OLLAMA AI
+    # HUGGING FACE AI
     # =========================
 
     try:
 
-        response = ollama.chat(
+        hf_token = os.getenv(
+            "HF_TOKEN"
+        )
 
-            model="gemma3:1b",
+        if not hf_token:
 
-            messages=[
+            raise ValueError(
+                "HF_TOKEN is missing."
+            )
 
-                {
-                    "role": "system",
 
-                    "content": """
+        response = requests.post(
 
+            "https://router.huggingface.co/v1/chat/completions",
+
+            headers={
+                "Authorization":
+                    f"Bearer {hf_token}",
+
+                "Content-Type":
+                    "application/json"
+            },
+
+            json={
+
+                "model":
+                    "openai/gpt-oss-120b:fastest",
+
+                "messages": [
+
+                    {
+                        "role":
+                            "system",
+
+                        "content":
+                            """
 You are Chetak, a helpful personal AI assistant.
 
 Your name is exactly Chetak.
@@ -348,29 +379,44 @@ Keep answers clear, natural and helpful.
 
 Do not claim that you cannot answer a normal question
 just because it is difficult. Try your best to answer it.
-
 """
+                    },
 
-                },
+                    {
+                        "role":
+                            "user",
 
-                {
-                    "role": "user",
-                    "content": user_message
-                }
+                        "content":
+                            user_message
+                    }
 
-            ]
+                ],
 
+                "stream":
+                    False
+            },
+
+            timeout=60
         )
 
 
-        answer = response[
+        response.raise_for_status()
+
+        response_data = response.json()
+
+        answer = response_data[
+            "choices"
+        ][0][
             "message"
         ][
             "content"
         ]
 
 
-        # Correct common incorrect spellings
+        # =========================
+        # CORRECT CHETAK SPELLING
+        # =========================
+
         answer = answer.replace(
             "Chetal",
             "Chetak"
@@ -413,20 +459,21 @@ just because it is difficult. Try your best to answer it.
 
 
         return jsonify({
-            "reply": answer
+            "reply":
+                answer
         })
 
 
     except Exception as e:
 
         print(
-            "OLLAMA ERROR:",
+            "AI ERROR:",
             e
         )
 
         return jsonify({
             "error":
-            "AI connection failed. Make sure Ollama is running."
+            "AI connection failed."
         }), 500
 
 
@@ -523,7 +570,6 @@ def open_app():
             "APP ERROR:",
             e
         )
-
 
         return jsonify({
             "reply":

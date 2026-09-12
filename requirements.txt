@@ -1,0 +1,6 @@
+Flask
+ollama
+opencv-contrib-python
+numpy
+tzdata
+gunicorn

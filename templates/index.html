@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Chetak AI Assistant</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            font-family: "Segoe UI", Arial, sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at 20% 20%,
+                    #10233a 0%,
+                    #060b12 35%,
+                    #020408 100%
+                );
+
+            color: #ffffff;
+        }
+
+        .app {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =========================
+           TOP BAR
+        ========================= */
+
+        .topbar {
+            height: 70px;
+            padding: 0 28px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            border-bottom: 1px solid rgba(0, 220, 255, 0.25);
+
+            background: rgba(3, 8, 15, 0.88);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 5px;
+            color: #00eaff;
+
+            text-shadow:
+                0 0 10px rgba(0, 234, 255, 0.7);
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            color: #8ba3b4;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+
+            background: #00ff9d;
+
+            box-shadow:
+                0 0 12px #00ff9d;
+
+            animation: statusPulse 1.8s infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.35;
+            }
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+        }
+
+        /* =========================
+           ROBOT PANEL
+        ========================= */
+
+        .robot-panel {
+            width: 42%;
+            min-width: 360px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            position: relative;
+
+            border-right:
+                1px solid rgba(0, 220, 255, 0.2);
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    rgba(0, 200, 255, 0.12),
+                    transparent 58%
+                );
+        }
+
+        .robot-stage {
+            position: relative;
+
+            width: 270px;
+            height: 270px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+
+            border:
+                1px solid rgba(0, 230, 255, 0.35);
+
+            animation:
+                rotateRing 12s linear infinite;
+        }
+
+        .ring.one {
+            width: 270px;
+            height: 270px;
+        }
+
+        .ring.two {
+            width: 235px;
+            height: 235px;
+
+            border-style: dashed;
+
+            animation:
+                rotateRingReverse 8s linear infinite;
+        }
+
+        .ring.three {
+            width: 205px;
+            height: 205px;
+
+            border:
+                1px solid rgba(0, 255, 180, 0.25);
+        }
+
+        @keyframes rotateRing {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes rotateRingReverse {
+            from {
+                transform: rotate(360deg);
+            }
+
+            to {
+                transform: rotate(0deg);
+            }
+        }
+
+        /* =========================
+           ROBOT
+        ========================= */
+
+        .robot {
+            width: 175px;
+            height: 175px;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            position: relative;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(0, 220, 255, 0.18),
+                    rgba(2, 8, 15, 0.96) 68%
+                );
+
+            border:
+                2px solid #00dfff;
+
+            box-shadow:
+                0 0 20px rgba(0, 220, 255, 0.45),
+                0 0 55px rgba(0, 180, 255, 0.18),
+                inset 0 0 35px rgba(0, 220, 255, 0.18);
+
+            animation:
+                robotPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes robotPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.035);
+            }
+        }
+
+        .robot-face {
+            width: 116px;
+            height: 82px;
+
+            border-radius: 25px;
+
+            position: relative;
+
+            border:
+                2px solid #00fff0;
+
+            background:
+                rgba(0, 30, 40, 0.6);
+
+            box-shadow:
+                0 0 20px rgba(0, 255, 240, 0.35);
+
+            overflow: hidden;
+        }
+
+        .robot-face::before {
+            content: "";
+
+            position: absolute;
+
+            left: 0;
+            right: 0;
+
+            top: -20px;
+
+            height: 18px;
+
+            background:
+                rgba(0, 255, 255, 0.5);
+
+            filter: blur(5px);
+
+            animation:
+                scan 2.5s linear infinite;
+        }
+
+        @keyframes scan {
+            0% {
+                top: -20px;
+            }
+
+            100% {
+                top: 100px;
+            }
+        }
+
+        .eye {
+            position: absolute;
+
+            width: 21px;
+            height: 21px;
+
+            top: 25px;
+
+            border-radius: 50%;
+
+            background: #00ffff;
+
+            box-shadow:
+                0 0 12px #00ffff,
+                0 0 24px rgba(0, 255, 255, 0.7);
+
+            animation:
+                eyeBlink 4s infinite;
+        }
+
+        .eye.left {
+            left: 25px;
+        }
+
+        .eye.right {
+            right: 25px;
+        }
+
+        @keyframes eyeBlink {
+            0%, 45%, 49%, 52%, 100% {
+                transform: scaleY(1);
+            }
+
+            47%, 51% {
+                transform: scaleY(0.08);
+            }
+        }
+
+        .mouth {
+            position: absolute;
+
+            left: 34px;
+            bottom: 15px;
+
+            width: 45px;
+            height: 4px;
+
+            border-radius: 5px;
+
+            background: #00fff0;
+
+            box-shadow:
+                0 0 10px #00fff0;
+
+            animation:
+                mouthIdle 2s ease-in-out infinite;
+        }
+
+        @keyframes mouthIdle {
+            0%, 100% {
+                transform: scaleX(0.75);
+            }
+
+            50% {
+                transform: scaleX(1);
+            }
+        }
+
+        /* LISTENING */
+
+        .robot.listening {
+            border-color: #00ff9d;
+
+            box-shadow:
+                0 0 30px rgba(0, 255, 157, 0.7),
+                0 0 70px rgba(0, 255, 157, 0.25);
+        }
+
+        .robot.listening .eye {
+            background: #00ff9d;
+
+            box-shadow:
+                0 0 15px #00ff9d;
+        }
+
+        /* THINKING */
+
+        .robot.thinking {
+            animation:
+                thinkingPulse 0.8s infinite;
+        }
+
+        @keyframes thinkingPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.06);
+            }
+        }
+
+        .robot.thinking .mouth {
+            width: 30px;
+            left: 43px;
+
+            animation:
+                thinkingMouth 0.5s infinite alternate;
+        }
+
+        @keyframes thinkingMouth {
+            from {
+                opacity: 0.35;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* SPEAKING */
+
+        .robot.speaking .mouth {
+            height: 13px;
+            border-radius: 50%;
+
+            animation:
+                speakingMouth 0.18s infinite alternate;
+        }
+
+        @keyframes speakingMouth {
+            from {
+                transform: scaleY(0.45);
+            }
+
+            to {
+                transform: scaleY(1);
+            }
+        }
+
+        .robot-title {
+            margin-top: 28px;
+
+            font-size: 24px;
+            font-weight: 700;
+
+            letter-spacing: 7px;
+
+            color: #00eaff;
+
+            text-shadow:
+                0 0 12px rgba(0, 234, 255, 0.7);
+        }
+
+        .robot-subtitle {
+            margin-top: 9px;
+
+            font-size: 10px;
+            letter-spacing: 2px;
+
+            color: #708899;
+        }
+
+        .face-status {
+            margin-top: 18px;
+
+            padding: 8px 17px;
+
+            border:
+                1px solid rgba(0, 255, 157, 0.45);
+
+            border-radius: 20px;
+
+            font-size: 10px;
+            letter-spacing: 1.5px;
+
+            color: #00ff9d;
+
+            background:
+                rgba(0, 255, 157, 0.05);
+        }
+
+        /* =========================
+           VOICE STATUS
+        ========================= */
+
+        .voice-status {
+            margin-top: 12px;
+
+            font-size: 10px;
+            letter-spacing: 1.5px;
+
+            color: #00dfff;
+
+            min-height: 15px;
+        }
+
+        /* =========================
+           CHAT
+        ========================= */
+
+        .chat-panel {
+            flex: 1;
+            min-width: 0;
+
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px 25px;
+
+            border-bottom:
+                1px solid rgba(0, 220, 255, 0.15);
+        }
+
+        .chat-header h2 {
+            margin: 0;
+
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+
+        .chat-header p {
+            margin: 6px 0 0;
+
+            font-size: 12px;
+
+            color: #718797;
+        }
+
+        /* =========================
+           CHAT BOX
+        ========================= */
+
+        .chat-box {
+            flex: 1;
+            min-height: 0;
+
+            overflow-y: auto;
+
+            padding: 25px;
+        }
+
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background:
+                rgba(0, 220, 255, 0.25);
+
+            border-radius: 10px;
+        }
+
+        .message {
+            display: flex;
+
+            margin-bottom: 18px;
+
+            animation:
+                messageIn 0.25s ease;
+        }
+
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 78%;
+
+            padding: 14px 17px;
+
+            border-radius: 15px;
+
+            line-height: 1.65;
+
+            font-size: 14px;
+
+            overflow-wrap: break-word;
+        }
+
+        .message.bot .message-content {
+            background:
+                rgba(0, 180, 255, 0.07);
+
+            border:
+                1px solid rgba(0, 220, 255, 0.22);
+
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user .message-content {
+            background:
+                rgba(0, 255, 157, 0.08);
+
+            border:
+                1px solid rgba(0, 255, 157, 0.22);
+
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-content h2 {
+            margin: 0 0 12px;
+            font-size: 19px;
+        }
+
+        .message-content h3 {
+            margin: 14px 0 9px;
+            font-size: 17px;
+        }
+
+        .message-content h4 {
+            margin: 12px 0 7px;
+            font-size: 15px;
+        }
+
+        .message-content strong {
+            font-weight: 700;
+        }
+
+        .message-content ul {
+            margin: 8px 0 12px 20px;
+            padding: 0;
+        }
+
+        .message-content li {
+            margin: 6px 0;
+        }
+
+        .numbered {
+            margin: 7px 0;
+        }
+
+        /* =========================
+           THINKING
+        ========================= */
+
+        .thinking-indicator {
+            display: none;
+
+            padding:
+                0 25px 12px;
+
+            font-size: 12px;
+
+            color: #00dfff;
+        }
+
+        .thinking-dots {
+            display: inline-flex;
+
+            gap: 4px;
+
+            margin-left: 5px;
+        }
+
+        .thinking-dots span {
+            animation:
+                dotAnimation 1.2s infinite;
+        }
+
+        .thinking-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .thinking-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dotAnimation {
+            0%, 60%, 100% {
+                opacity: 0.25;
+            }
+
+            30% {
+                opacity: 1;
+            }
+        }
+
+        /* =========================
+           INPUT
+        ========================= */
+
+        .input-area {
+            padding:
+                17px 25px 22px;
+
+            border-top:
+                1px solid rgba(0, 220, 255, 0.15);
+
+            background:
+                rgba(3, 8, 15, 0.65);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 9px;
+        }
+
+        #input {
+            flex: 1;
+            min-width: 0;
+
+            padding:
+                14px 16px;
+
+            border-radius: 12px;
+
+            border:
+                1px solid rgba(0, 220, 255, 0.28);
+
+            outline: none;
+
+            background:
+                #080f18;
+
+            color: #ffffff;
+
+            font-size: 14px;
+
+            transition: 0.2s;
+        }
+
+        #input:focus {
+            border-color: #00dfff;
+
+            box-shadow:
+                0 0 15px rgba(0, 220, 255, 0.14);
+        }
+
+        #input::placeholder {
+            color: #526978;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+
+            font-family: inherit;
+
+            border-radius: 12px;
+
+            transition: 0.2s;
+        }
+
+        #sendBtn {
+            width: 95px;
+
+            background:
+                #00dfff;
+
+            color:
+                #001017;
+
+            font-weight: 700;
+
+            letter-spacing: 0.5px;
+        }
+
+        #sendBtn:hover {
+            transform: translateY(-1px);
+
+            box-shadow:
+                0 0 18px rgba(0, 220, 255, 0.35);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.45;
+
+            cursor: not-allowed;
+
+            transform: none;
+
+            box-shadow: none;
+        }
+
+        #micBtn {
+            width: 54px;
+
+            background:
+                #0d1722;
+
+            color:
+                #00ffff;
+
+            border:
+                1px solid rgba(0, 255, 255, 0.3);
+
+            font-size: 19px;
+        }
+
+        #micBtn:hover {
+            background:
+                #132331;
+        }
+
+        #micBtn.listening {
+            background:
+                #00ff9d;
+
+            color:
+                #00150c;
+
+            box-shadow:
+                0 0 20px rgba(0, 255, 157, 0.5);
+
+            animation:
+                micPulse 1s infinite;
+        }
+
+        @keyframes micPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.08);
+            }
+        }
+
+        #clearBtn {
+            margin-top: 10px;
+
+            padding:
+                7px 14px;
+
+            background:
+                transparent;
+
+            color:
+                #637988;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.1);
+
+            font-size: 10px;
+
+            letter-spacing: 0.7px;
+        }
+
+        #clearBtn:hover {
+            color: #ffffff;
+
+            border-color:
+                rgba(255, 255, 255, 0.25);
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 800px) {
+
+            body {
+                overflow: auto;
+            }
+
+            .topbar {
+                height: 60px;
+                padding: 0 18px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            .main {
+                flex-direction: column;
+                min-height: 0;
+            }
+
+            .robot-panel {
+                width: 100%;
+                min-width: 0;
+
+                height: 310px;
+                flex-shrink: 0;
+
+                border-right: none;
+
+                border-bottom:
+                    1px solid rgba(0, 220, 255, 0.2);
+            }
+
+            .robot-stage {
+                transform: scale(0.72);
+            }
+
+            .robot-title {
+                margin-top: -20px;
+                font-size: 19px;
+            }
+
+            .chat-panel {
+                height:
+                    calc(100vh - 370px);
+
+                min-height: 0;
+            }
+
+            .chat-box {
+                padding: 18px;
+            }
+
+            .input-area {
+                padding:
+                    12px 18px 17px;
+            }
+
+            .message-content {
+                max-width: 88%;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+    <!-- =========================
+         TOP BAR
+    ========================= -->
+
+    <div class="topbar">
+
+        <div class="logo">
+            CHETAK
+        </div>
+
+        <div class="system-status">
+
+            <div class="status-dot"></div>
+
+            <span>
+                SYSTEM ONLINE
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="main">
+
+
+        <!-- =========================
+             ROBOT
+        ========================= -->
+
+        <div class="robot-panel">
+
+            <div
+                class="robot-stage"
+                id="robotStage"
+            >
+
+                <div class="ring one"></div>
+
+                <div class="ring two"></div>
+
+                <div class="ring three"></div>
+
+
+                <div
+                    class="robot"
+                    id="robot"
+                >
+
+                    <div class="robot-face">
+
+                        <div class="eye left"></div>
+
+                        <div class="eye right"></div>
+
+                        <div class="mouth"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="robot-title">
+                CHETAK
+            </div>
+
+
+            <div class="robot-subtitle">
+                VOICE • VISION • INTELLIGENCE
+            </div>
+
+
+            <div class="face-status">
+                ✓ FACE VERIFIED
+            </div>
+
+
+            <div
+                class="voice-status"
+                id="voiceStatus"
+            >
+                SAY "CHETAK" TO ACTIVATE
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             CHAT
+        ========================= -->
+
+        <div class="chat-panel">
+
+            <div class="chat-header">
+
+                <h2>
+                    Command Center
+                </h2>
+
+                <p>
+                    Ask me anything or give me a command
+                </p>
+
+            </div>
+
+
+            <div
+                id="chatBox"
+                class="chat-box"
+            >
+
+                <div class="message bot">
+
+                    <div class="message-content">
+
+                        Hello! 👋
+
+                        <br><br>
+
+                        Face verification successful.
+
+                        <br><br>
+
+                        I am <strong>Chetak</strong>.
+                        I am ready for your commands.
+
+                        <br><br>
+
+                        Say <strong>"Chetak"</strong>
+                        to activate voice mode.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="typing"
+                class="thinking-indicator"
+            >
+
+                Chetak is thinking
+
+                <span class="thinking-dots">
+
+                    <span>●</span>
+                    <span>●</span>
+                    <span>●</span>
+
+                </span>
+
+            </div>
+
+
+            <div class="input-area">
+
+                <div class="input-row">
+
+                    <input
+                        id="input"
+                        type="text"
+                        placeholder="Type your command..."
+                        autocomplete="off"
+                    >
+
+
+                    <button
+                        id="micBtn"
+                        type="button"
+                        title="Voice Input"
+                    >
+                        🎙️
+                    </button>
+
+
+                    <button
+                        id="sendBtn"
+                        type="button"
+                    >
+                        SEND
+                    </button>
+
+                </div>
+
+
+                <button
+                    id="clearBtn"
+                    type="button"
+                >
+                    CLEAR CHAT
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+    /* =========================
+       ELEMENTS
+    ========================= */
+
+    const input =
+        document.getElementById("input");
+
+    const sendBtn =
+        document.getElementById("sendBtn");
+
+    const micBtn =
+        document.getElementById("micBtn");
+
+    const clearBtn =
+        document.getElementById("clearBtn");
+
+    const chatBox =
+        document.getElementById("chatBox");
+
+    const typing =
+        document.getElementById("typing");
+
+    const robot =
+        document.getElementById("robot");
+
+    const voiceStatus =
+        document.getElementById("voiceStatus");
+
+
+    /* =========================
+       FORMAT AI RESPONSE
+    ========================= */
+
+    function formatAIResponse(text) {
+
+        let formatted = String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+
+        formatted = formatted.replace(
+            /\*\*(.*?)\*\*/g,
+            "<strong>$1</strong>"
+        );
+
+
+        formatted = formatted.replace(
+            /^### (.*)$/gm,
+            "<h4>$1</h4>"
+        );
+
+
+        formatted = formatted.replace(
+            /^## (.*)$/gm,
+            "<h3>$1</h3>"
+        );
+
+
+        formatted = formatted.replace(
+            /^# (.*)$/gm,
+            "<h2>$1</h2>"
+        );
+
+
+        formatted = formatted.replace(
+            /^\s*[-*]\s+(.*)$/gm,
+            "<div class='numbered'>• $1</div>"
+        );
+
+
+        formatted = formatted.replace(
+            /^\s*(\d+)\.\s+(.*)$/gm,
+            "<div class='numbered'><strong>$1.</strong> $2</div>"
+        );
+
+
+        formatted = formatted.replace(
+            /\n\n/g,
+            "<br><br>"
+        );
+
+
+        formatted = formatted.replace(
+            /\n/g,
+            "<br>"
+        );
+
+
+        return formatted;
+    }
+
+
+    /* =========================
+       ADD MESSAGE
+    ========================= */
+
+    function addMessage(text, type) {
+
+        const message =
+            document.createElement("div");
+
+        message.className =
+            "message " + type;
+
+        const content =
+            document.createElement("div");
+
+        content.className =
+            "message-content";
+
+
+        if (type === "bot") {
+
+            content.innerHTML =
+                formatAIResponse(text);
+
+        } else {
+
+            content.textContent =
+                text;
+
+        }
+
+
+        message.appendChild(content);
+
+        chatBox.appendChild(message);
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+    }
+
+
+    /* =========================
+       THINKING
+    ========================= */
+
+    function showThinking() {
+
+        typing.style.display =
+            "block";
+
+        robot.classList.add(
+            "thinking"
+        );
+
+        voiceStatus.textContent =
+            "CHETAK IS THINKING...";
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+    }
+
+
+    function removeThinking() {
+
+        typing.style.display =
+            "none";
+
+        robot.classList.remove(
+            "thinking"
+        );
+    }
+
+
+    /* =========================
+       SPEAK
+    ========================= */
+
+   function speak(text) {
+
+    if (!("speechSynthesis" in window)) {
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    const voices = window.speechSynthesis.getVoices();
+
+    const femaleVoice = voices.find(voice =>
+        /female|zira|samantha|aria|jenny|susan|hazel|google us english/i.test(voice.name)
+        && /^en/i.test(voice.lang)
+    );
+
+    if (femaleVoice) {
+        utterance.voice = femaleVoice;
+    }
+
+    utterance.lang = "en-IN";
+    utterance.rate = 0.92;
+    utterance.pitch = 1.08;
+    utterance.volume = 1;
+
+    utterance.onstart = function() {
+        robot.classList.add("speaking");
+        voiceStatus.textContent = "CHETAK IS SPEAKING...";
+    };
+
+    utterance.onend = function() {
+        robot.classList.remove("speaking");
+        voiceStatus.textContent = 'SAY "CHETAK" TO ACTIVATE';
+    };
+
+    utterance.onerror = function() {
+        robot.classList.remove("speaking");
+        voiceStatus.textContent = 'SAY "CHETAK" TO ACTIVATE';
+    };
+
+    window.speechSynthesis.speak(utterance);
+}
+
+
+    /* =========================
+       SEND MESSAGE
+    ========================= */
+
+    async function sendMessage() {
+
+        const message =
+            input.value.trim();
+
+
+        if (!message) {
+            return;
+        }
+
+
+        addMessage(
+            message,
+            "user"
+        );
+
+
+        input.value = "";
+
+
+        sendBtn.disabled =
+            true;
+
+
+        showThinking();
+
+
+        const lowerMessage =
+            message.toLowerCase();
+
+
+        /* =========================
+           OPEN APP COMMAND
+        ========================= */
+
+        const openCommand =
+            lowerMessage.startsWith(
+                "open "
+            ) ||
+            lowerMessage.startsWith(
+                "launch "
+            ) ||
+            lowerMessage.startsWith(
+                "start "
+            );
+
+
+        if (openCommand) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/open_app",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    command:
+                                        message
+                                })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                removeThinking();
+
+
+                if (data.reply) {
+
+                    addMessage(
+                        data.reply,
+                        "bot"
+                    );
+
+                    speak(
+                        data.reply
+                    );
+
+                } else {
+
+                    addMessage(
+                        "I couldn't open that application.",
+                        "bot"
+                    );
+
+                }
+
+
+                sendBtn.disabled =
+                    false;
+
+                return;
+
+            } catch (error) {
+
+                console.error(
+                    "APP COMMAND ERROR:",
+                    error
+                );
+
+
+                removeThinking();
+
+
+                addMessage(
+                    "I couldn't connect to the computer command system.",
+                    "bot"
+                );
+
+
+                sendBtn.disabled =
+                    false;
+
+                return;
+            }
+        }
+
+
+        /* =========================
+           AI CHAT
+        ========================= */
+
+        try {
+
+            const response =
+                await fetch(
+                    "/chat",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+                                message:
+                                    message
+                            })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            removeThinking();
+
+
+            if (data.reply) {
+
+                addMessage(
+                    data.reply,
+                    "bot"
+                );
+
+
+                speak(
+                    data.reply
+                );
+
+            } else {
+
+                addMessage(
+                    data.error ||
+                    "Sorry, I couldn't get a response from the AI.",
+                    "bot"
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "CHAT ERROR:",
+                error
+            );
+
+
+            removeThinking();
+
+
+            addMessage(
+                "Connection error. Please make sure Chetak is running.",
+                "bot"
+            );
+
+        }
+
+
+        sendBtn.disabled =
+            false;
+    }
+
+
+    /* =========================
+       SEND BUTTON
+    ========================= */
+
+    sendBtn.addEventListener(
+        "click",
+        sendMessage
+    );
+
+
+    /* =========================
+       ENTER KEY
+    ========================= */
+
+    input.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                event.preventDefault();
+
+                sendMessage();
+
+            }
+
+        }
+    );
+
+
+    /* =========================
+       CLEAR CHAT
+    ========================= */
+
+    clearBtn.addEventListener(
+        "click",
+        function() {
+
+            window.speechSynthesis.cancel();
+
+            chatBox.innerHTML = "";
+
+            addMessage(
+                "Chat cleared. 👋 How can I help you?",
+                "bot"
+            );
+
+        }
+    );
+
+
+    /* =========================
+       VOICE RECOGNITION
+    ========================= */
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+
+    let recognition = null;
+
+    let voiceMode = false;
+
+    let manuallyStopped = false;
+
+
+    if (SpeechRecognition) {
+
+        recognition =
+            new SpeechRecognition();
+
+
+        recognition.continuous =
+            false;
+
+        recognition.interimResults =
+            false;
+
+        recognition.lang =
+            "en-IN";
+
+
+        /* =========================
+           START LISTENING
+        ========================= */
+
+        function startListening() {
+
+            if (!recognition) {
+                return;
+            }
+
+
+            if (
+                window.speechSynthesis.speaking
+            ) {
+                return;
+            }
+
+
+            try {
+
+                manuallyStopped = false;
+
+                recognition.start();
+
+            } catch (error) {
+
+                console.log(
+                    "Recognition already running."
+                );
+
+            }
+
+        }
+
+
+        /* =========================
+           RECOGNITION START
+        ========================= */
+
+        recognition.onstart =
+            function() {
+
+                micBtn.classList.add(
+                    "listening"
+                );
+
+
+                micBtn.textContent =
+                    "🔴";
+
+
+                robot.classList.add(
+                    "listening"
+                );
+
+
+                voiceStatus.textContent =
+                    "LISTENING FOR \"CHETAK\"...";
+
+            };
+
+
+        /* =========================
+           RECOGNITION END
+        ========================= */
+
+        recognition.onend =
+            function() {
+
+                micBtn.classList.remove(
+                    "listening"
+                );
+
+
+                micBtn.textContent =
+                    "🎙️";
+
+
+                robot.classList.remove(
+                    "listening"
+                );
+
+
+                /*
+                 * Automatically listen again
+                 * when Chetak voice mode is active.
+                 */
+
+                if (
+                    voiceMode &&
+                    !manuallyStopped
+                ) {
+
+                    setTimeout(
+                        startListening,
+                        500
+                    );
+
+                } else {
+
+                    voiceStatus.textContent =
+                        "SAY \"CHETAK\" TO ACTIVATE";
+
+                }
+
+            };
+
+
+        /* =========================
+           RECOGNITION ERROR
+        ========================= */
+
+        recognition.onerror =
+            function(event) {
+
+                console.error(
+                    "Speech recognition error:",
+                    event.error
+                );
+
+
+                micBtn.classList.remove(
+                    "listening"
+                );
+
+
+                micBtn.textContent =
+                    "🎙️";
+
+
+                robot.classList.remove(
+                    "listening"
+                );
+
+
+                /*
+                 * Ignore normal browser
+                 * recognition interruptions.
+                 */
+
+                if (
+                    event.error ===
+                    "not-allowed"
+                ) {
+
+                    voiceMode = false;
+
+                    manuallyStopped = true;
+
+                    voiceStatus.textContent =
+                        "MICROPHONE PERMISSION REQUIRED";
+
+                }
+
+            };
+
+
+        /* =========================
+           VOICE RESULT
+        ========================= */
+
+        recognition.onresult =
+            function(event) {
+
+                let transcript =
+                    event.results[0][0]
+                        .transcript
+                        .trim();
+
+
+                console.log(
+                    "Heard:",
+                    transcript
+                );
+
+
+                /*
+                 * Correct common variations
+                 * of the name Chetak.
+                 */
+
+                transcript =
+                    transcript.replace(
+                        /\bchetal\b/gi,
+                        "Chetak"
+                    );
+
+                transcript =
+                    transcript.replace(
+                        /\bcheta\b/gi,
+                        "Chetak"
+                    );
+
+                transcript =
+                    transcript.replace(
+                        /\bchetek\b/gi,
+                        "Chetak"
+                    );
+
+                transcript =
+                    transcript.replace(
+                        /\bchetac\b/gi,
+                        "Chetak"
+                    );
+
+                transcript =
+                    transcript.replace(
+                        /\bchetik\b/gi,
+                        "Chetak"
+                    );
+
+
+                /*
+                 * Remove wake word.
+                 */
+
+                const wakeWord =
+                    /\bchetak\b/i;
+
+
+                if (
+                    voiceMode
+                ) {
+
+                    /*
+                     * In continuous voice mode,
+                     * only respond when the
+                     * wake word is heard.
+                     */
+
+                    if (
+                        !wakeWord.test(
+                            transcript
+                        )
+                    ) {
+
+                        return;
+                    }
+
+                }
+
+
+                /*
+                 * Remove "Chetak" from command.
+                 */
+
+                let command =
+                    transcript.replace(
+                        wakeWord,
+                        ""
+                    ).trim();
+
+
+                /*
+                 * If user only says Chetak,
+                 * wait for the next command.
+                 */
+
+                if (!command) {
+
+                    voiceStatus.textContent =
+                        "YES, I'M LISTENING...";
+
+                    speak(
+                        "Yes, I'm listening."
+                    );
+
+                    return;
+                }
+
+
+                input.value =
+                    command;
+
+
+                sendMessage();
+
+            };
+
+
+        /* =========================
+           MICROPHONE BUTTON
+        ========================= */
+
+        micBtn.addEventListener(
+            "click",
+            function() {
+
+                if (voiceMode) {
+
+                    voiceMode = false;
+
+                    manuallyStopped = true;
+
+
+                    try {
+                        recognition.stop();
+                    } catch (error) {
+                        console.log(error);
+                    }
+
+
+                    voiceStatus.textContent =
+                        "VOICE MODE OFF";
+
+
+                    return;
+                }
+
+
+                voiceMode = true;
+
+                manuallyStopped = false;
+
+
+                startListening();
+
+            }
+        );
+
+
+        /* =========================
+           AUTOMATIC VOICE MODE
+        ========================= */
+
+        /*
+         * Wait briefly after the page loads.
+         * Browser will ask for microphone
+         * permission if required.
+         */
+
+        setTimeout(
+            function() {
+
+                voiceMode = true;
+
+                startListening();
+
+            },
+            1200
+        );
+
+    } else {
+
+        micBtn.addEventListener(
+            "click",
+            function() {
+
+                addMessage(
+                    "Voice recognition is not supported by this browser.",
+                    "bot"
+                );
+
+            }
+        );
+
+
+        voiceStatus.textContent =
+            "VOICE RECOGNITION NOT SUPPORTED";
+
+    }
+
+
+</script>
+
+
+</body>
+
+</html>

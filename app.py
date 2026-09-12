@@ -2,13 +2,11 @@ from flask import Flask, render_template, request, jsonify
 import requests
 import os
 import subprocess
-import re
 import json
 import urllib.parse
 import urllib.request
 from datetime import datetime
 from zoneinfo import ZoneInfo
-
 
 app = Flask(__name__)
 
@@ -52,8 +50,6 @@ def get_location_info(location):
     country = place.get("country", "")
     timezone = place.get("timezone", "UTC")
 
-
-    # Get current temperature
     weather_url = (
         "https://api.open-meteo.com/v1/forecast"
         f"?latitude={latitude}"
@@ -82,15 +78,12 @@ def get_location_info(location):
 
     if temperature is None:
         raise ValueError(
-            "Temperature data was not returned by weather service"
+            "Temperature data was not returned"
         )
 
-
-    # Get local time
     local_time = datetime.now(
         ZoneInfo(timezone)
     )
-
 
     return {
         "city": city,
@@ -112,25 +105,21 @@ def extract_location(message):
 
     patterns = [
 
-        # What is the time in Perth?
         r"(?:what(?:'s| is)?|tell me|give me)?\s*"
         r"(?:the\s+)?time\s+(?:in|at|of)\s+(.+?)[?.!]*$",
 
-        # Current time in Perth
         r"(?:current|local)\s+time\s+(?:in|at|of)\s+(.+?)[?.!]*$",
 
-        # What is the temperature in Delhi?
         r"(?:what(?:'s| is)?|tell me|give me)?\s*"
         r"(?:the\s+)?(?:temperature|temp)\s+(?:in|at|of)\s+(.+?)[?.!]*$",
 
-        # Weather in Delhi
         r"(?:what(?:'s| is)?|tell me|give me)?\s*"
         r"(?:the\s+)?weather\s+(?:in|at|of)\s+(.+?)[?.!]*$",
-
     ]
 
-
     for pattern in patterns:
+
+        import re
 
         match = re.search(
             pattern,
@@ -140,9 +129,7 @@ def extract_location(message):
 
         if match:
 
-            location = match.group(
-                1
-            ).strip()
+            location = match.group(1).strip()
 
             location = re.sub(
                 r"[?.!]+$",
@@ -151,7 +138,6 @@ def extract_location(message):
             ).strip()
 
             return location
-
 
     return None
 
@@ -199,13 +185,12 @@ def home():
 )
 def chat():
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
     user_message = data.get(
         "message",
         ""
     ).strip()
-
 
     if not user_message:
 
@@ -223,7 +208,6 @@ def chat():
         user_message
     )
 
-
     if location:
 
         try:
@@ -232,7 +216,6 @@ def chat():
                 location
             )
 
-
             if info is None:
 
                 return jsonify({
@@ -240,22 +223,14 @@ def chat():
                     f"I couldn't find the location '{location}'."
                 })
 
-
-            time_requested = (
-                is_time_question(
-                    user_message
-                )
+            time_requested = is_time_question(
+                user_message
             )
 
-
-            weather_requested = (
-                is_weather_question(
-                    user_message
-                )
+            weather_requested = is_weather_question(
+                user_message
             )
 
-
-            # Both time and temperature
             if (
                 time_requested
                 and weather_requested
@@ -271,8 +246,6 @@ def chat():
                     f"{info['temperature']}°C."
                 )
 
-
-            # Time only
             elif time_requested:
 
                 reply = (
@@ -283,8 +256,6 @@ def chat():
                     f"{info['date']}."
                 )
 
-
-            # Temperature / weather
             else:
 
                 reply = (
@@ -294,11 +265,9 @@ def chat():
                     f"{info['temperature']}°C."
                 )
 
-
             return jsonify({
                 "reply": reply
             })
-
 
         except Exception as e:
 
@@ -309,7 +278,7 @@ def chat():
 
             return jsonify({
                 "reply":
-                "I couldn't get the current time or weather right now. Please check your internet connection."
+                "I couldn't get the current time or weather right now."
             })
 
 
@@ -319,42 +288,46 @@ def chat():
 
     try:
 
-        hf_token = os.getenv(
-            "HF_TOKEN"
-        )
+        hf_token = os.getenv("HF_TOKEN")
 
         if not hf_token:
 
-            raise ValueError(
-                "HF_TOKEN is missing."
-            )
+            print("AI ERROR: HF_TOKEN is missing")
+
+            return jsonify({
+                "error":
+                "HF_TOKEN is missing on the server."
+            }), 500
 
 
-        response = requests.post(
+        api_url = (
+            "https://router.huggingface.co/v1/chat/completions"
+        )
 
-            "https://router.huggingface.co/v1/chat/completions",
 
-            headers={
-                "Authorization":
-                    f"Bearer {hf_token}",
+        headers = {
 
-                "Content-Type":
-                    "application/json"
-            },
+            "Authorization":
+                f"Bearer {hf_token}",
 
-            json={
+            "Content-Type":
+                "application/json"
+        }
 
-                "model":
-                    "openai/gpt-oss-120b:fastest",
 
-                "messages": [
+        payload = {
 
-                    {
-                        "role":
-                            "system",
+            "model":
+                "openai/gpt-oss-120b:fastest",
 
-                        "content":
-                            """
+            "messages": [
+
+                {
+                    "role":
+                        "system",
+
+                    "content":
+                        """
 You are Chetak, a helpful personal AI assistant.
 
 Your name is exactly Chetak.
@@ -380,88 +353,118 @@ Keep answers clear, natural and helpful.
 Do not claim that you cannot answer a normal question
 just because it is difficult. Try your best to answer it.
 """
-                    },
+                },
 
-                    {
-                        "role":
-                            "user",
+                {
+                    "role":
+                        "user",
 
-                        "content":
-                            user_message
-                    }
+                    "content":
+                        user_message
+                }
+            ],
 
-                ],
+            "stream":
+                False
+        }
 
-                "stream":
-                    False
-            },
 
+        response = requests.post(
+            api_url,
+            headers=headers,
+            json=payload,
             timeout=60
+        )
+
+
+        print(
+            "HUGGING FACE STATUS:",
+            response.status_code
+        )
+
+        print(
+            "HUGGING FACE RESPONSE:",
+            response.text[:1000]
         )
 
 
         response.raise_for_status()
 
+
         response_data = response.json()
 
-        answer = response_data[
-            "choices"
-        ][0][
-            "message"
-        ][
-            "content"
-        ]
+
+        answer = (
+            response_data["choices"][0]
+            ["message"]["content"]
+        )
 
 
         # =========================
         # CORRECT CHETAK SPELLING
         # =========================
 
-        answer = answer.replace(
-            "Chetal",
-            "Chetak"
-        )
+        replacements = {
 
-        answer = answer.replace(
-            "chetal",
-            "Chetak"
-        )
+            "Chetal": "Chetak",
+            "chetal": "Chetak",
+            "Chetac": "Chetak",
+            "chetac": "Chetak",
+            "Chetik": "Chetak",
+            "chetik": "Chetak",
+            "Chetek": "Chetak",
+            "chetek": "Chetak"
+        }
 
-        answer = answer.replace(
-            "Chetac",
-            "Chetak"
-        )
 
-        answer = answer.replace(
-            "chetac",
-            "Chetak"
-        )
+        for old, new in replacements.items():
 
-        answer = answer.replace(
-            "Chetik",
-            "Chetak"
-        )
-
-        answer = answer.replace(
-            "chetik",
-            "Chetak"
-        )
-
-        answer = answer.replace(
-            "Chetek",
-            "Chetak"
-        )
-
-        answer = answer.replace(
-            "chetek",
-            "Chetak"
-        )
+            answer = answer.replace(
+                old,
+                new
+            )
 
 
         return jsonify({
             "reply":
                 answer
         })
+
+
+    except requests.exceptions.HTTPError as e:
+
+        print(
+            "HUGGING FACE HTTP ERROR:",
+            e
+        )
+
+        print(
+            "STATUS:",
+            response.status_code
+        )
+
+        print(
+            "RESPONSE:",
+            response.text[:1000]
+        )
+
+        return jsonify({
+            "error":
+                f"Hugging Face error: {response.status_code}"
+        }), 500
+
+
+    except requests.exceptions.RequestException as e:
+
+        print(
+            "HUGGING FACE CONNECTION ERROR:",
+            e
+        )
+
+        return jsonify({
+            "error":
+                "Could not connect to Hugging Face."
+        }), 500
 
 
     except Exception as e:
@@ -473,7 +476,7 @@ just because it is difficult. Try your best to answer it.
 
         return jsonify({
             "error":
-            "AI connection failed."
+                "AI error occurred. Check Render logs."
         }), 500
 
 
@@ -487,7 +490,7 @@ just because it is difficult. Try your best to answer it.
 )
 def open_app():
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
     command = data.get(
         "command",
@@ -520,7 +523,6 @@ def open_app():
 
         "explorer":
             "explorer"
-
     }
 
 
@@ -583,8 +585,15 @@ def open_app():
 
 if __name__ == "__main__":
 
+    port = int(
+        os.environ.get(
+            "PORT",
+            5000
+        )
+    )
+
     app.run(
         host="0.0.0.0",
-        port=5000,
+        port=port,
         debug=False
     )
